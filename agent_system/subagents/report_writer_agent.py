@@ -22,14 +22,28 @@ class ReportWriterAgent(BaseSubAgent):
     
     def get_specialized_instructions(self) -> str:
         """
-        Compressed report-specific instructions
+        Enhanced report-specific instructions with Drive folder creation
         """
         return """DOCUMENT OPERATIONS:
 - Create Google Docs with professional formatting
+- Create Google Drive folders for organizing reports and resources
+- Share documents/folders with "anyone with link can view" permissions
 - Structure: Headings, bullets, tables, executive summaries
-- Set sharing permissions appropriately
 
-DOCUMENT TYPES: Reports, proposals, meeting notes, documentation
+SHARING WORKFLOW:
+1. Create Google Drive folder for the report/project
+2. Create Google Doc(s) inside the folder
+3. Upload any additional files (CSVs, charts) to the folder
+4. Set folder permissions to "anyone with link can view"
+5. Return folder link AND document link
 
-OUTPUT: Document ID/URL, sharing permissions, section breakdown, word count."""
+DOCUMENT TYPES: Reports, proposals, meeting notes, documentation, analytics summaries
+
+CRITICAL FOR REPORTS:
+- Always create a dedicated folder for multi-file reports
+- Set sharing to "anyone with the link can view"
+- Include folder link in response for easy access
+- Organize content logically (main doc + supporting files)
+
+OUTPUT: Folder link, document ID/URL, sharing permissions set to "anyone with link", section breakdown, file count."""
 

@@ -4,66 +4,77 @@ Message utility functions for bot detection and message formatting
 import re
 from typing import Optional
 
-# Bot marker constant - must be unique and detectable
-BOT_MARKER = "[BOT_CONFIRMATION]"
+# Unique bot marker to identify system-generated messages
+BOT_MARKER = "🤖_AI_AGENT_"
 
-def add_bot_marker(message: str) -> str:
-    """
-    Add bot marker to message to prevent infinite loop
-    
-    Args:
-        message: Message content
-    
-    Returns:
-        Message with bot marker appended
-    """
-    # Add marker at end of message (hidden in WhatsApp)
-    return f"{message}\n\n{BOT_MARKER}"
+# Pattern indicators that suggest bot-generated content
+BOT_PATTERNS = [
+    "✅ *Task Completed*",
+    "_Processed in",
+    "by AI agents_",
+    "Zapier request ID:",
+    "Message ID: 19a",
+    "Event ID:",
+    "Google Meet: https://meet.google.com",
+    "Meeting created",
+    "Email sent",
+]
 
 def is_bot_message(message: str) -> bool:
     """
-    Check if message is a bot-generated confirmation
+    Check if message is from the bot system (to prevent infinite loops)
+    
+    Uses two layers of detection:
+    1. Primary: Check for unique bot marker
+    2. Backup: Check for multiple bot-specific patterns
     
     Args:
-        message: Message to check
+        message: Message content to check
     
     Returns:
-        True if message appears to be from bot
+        True if message is identified as bot-generated
     """
     if not message:
         return False
     
-    # Check for explicit bot marker
+    # Layer 1: Check for the unique bot marker (most reliable)
     if BOT_MARKER in message:
         return True
     
-    # Check for multiple bot patterns (stronger detection)
-    bot_patterns = [
-        r'✅.*Task Completed',
-        r'Processed in \d+ steps by AI agents',
-        r'\[BOT_CONFIRMATION\]',
-        r'_Processed.*AI agents_'
-    ]
+    # Layer 2: Backup detection using pattern matching
+    # If message has 2+ bot patterns, it's very likely a bot message
+    pattern_matches = sum(1 for pattern in BOT_PATTERNS if pattern in message)
+    if pattern_matches >= 2:
+        return True
     
-    matches = 0
-    for pattern in bot_patterns:
-        if re.search(pattern, message, re.IGNORECASE):
-            matches += 1
-    
-    # If 2+ patterns match, likely a bot message
-    return matches >= 2
+    return False
 
-def extract_user_message(message: str) -> str:
+def add_bot_marker(message: str) -> str:
     """
-    Extract user message from a message that might contain bot marker
+    Add bot marker to message to enable detection
+    
+    Call this function before sending any bot-generated message
+    to ensure it won't be processed as a new user request.
     
     Args:
-        message: Message with potential bot marker
+        message: Original message content
     
     Returns:
-        User message without bot marker
+        Message with bot marker appended (at the end, subtle)
     """
-    if BOT_MARKER in message:
-        return message.split(BOT_MARKER)[0].strip()
-    return message.strip()
+    # Add marker at the end of message
+    # The marker is subtle and won't disrupt the user experience
+    return f"{message}\n\n{BOT_MARKER}"
+
+def remove_bot_marker(message: str) -> str:
+    """
+    Remove bot marker from message (if present)
+    
+    Args:
+        message: Message that may contain bot marker
+    
+    Returns:
+        Message with bot marker removed
+    """
+    return message.replace(BOT_MARKER, "").strip()
 

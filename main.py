@@ -118,10 +118,12 @@ async def process_request_async(json_input: Dict[str, Any], run_id: str = None) 
         if orchestrator_result.get("success"):
             logger.log("=== REQUEST PROCESSING COMPLETED SUCCESSFULLY ===")
             
-            # Check if source is WhatsApp - if so, send confirmation
+            # Check source and send response via appropriate channel
             source = input_body["current_message_input"].get("source", "")
             whatsapp_sent = False
             whatsapp_details = None
+            email_sent = False
+            email_details = None
             
             if source.lower() == "whatsapp":
                 logger.log("\n=== WHATSAPP CONFIRMATION ===")
@@ -195,6 +197,87 @@ IMPORTANT: The phone number {phone_number} already includes the + prefix and cou
                         "reason": "no_phone_number"
                     }
             
+            elif source.lower() == "email":
+                logger.log("\n=== EMAIL RESPONSE ===")
+                logger.log("Source is Email - sending response via email...")
+                
+                # Extract email address from user field
+                recipient_email = input_body["current_message_input"].get("sender")
+                
+                if recipient_email and "@" in recipient_email:
+                    logger.log(f"Recipient email: {recipient_email}")
+                    
+                    try:
+                        # Import Email Agent
+                        from agent_system.subagents.email_agent import EmailAgent
+                        
+                        # Format email response
+                        subject = json_input.get("subject", "Re: Your Request")
+                        if not subject.startswith("Re:"):
+                            subject = f"Re: {subject}"
+                        
+                        email_body = f"""Hello,
+
+Here are the results of your request:
+
+{orchestrator_result.get("final_summary", "")}
+
+---
+This is an automated response from DiddyMac AI Agent System.
+"""
+                        
+                        logger.log(f"Formatted email response for subject: {subject}")
+                        logger.save_text("email_response.txt", email_body)
+                        
+                        # Send via Email Agent
+                        email_agent = EmailAgent(logger)
+                        
+                        email_task = f"""Send this email response.
+
+To: {recipient_email}
+Subject: {subject}
+
+Message:
+{email_body}
+
+Send the email now."""
+                        
+                        # Use async run method
+                        email_run_result = await email_agent.run(email_task, max_turns=10)
+                        email_result = {
+                            "success": True,
+                            "result": str(email_run_result.final_output)
+                        }
+                        
+                        if email_result.get("success"):
+                            logger.log("✅ Email response sent successfully")
+                            email_sent = True
+                            email_details = {
+                                "recipient": recipient_email,
+                                "subject": subject,
+                                "status": "sent"
+                            }
+                        else:
+                            logger.log(f"❌ Email send failed: {email_result.get('error')}", "ERROR")
+                            email_details = {
+                                "recipient": recipient_email,
+                                "status": "failed",
+                                "error": email_result.get("error")
+                            }
+                    
+                    except Exception as e:
+                        logger.log(f"Error sending email response: {str(e)}", "ERROR")
+                        email_details = {
+                            "status": "error",
+                            "error": str(e)
+                        }
+                else:
+                    logger.log("⚠️ Could not extract email address from user field", "WARNING")
+                    email_details = {
+                        "status": "skipped",
+                        "reason": "no_email_address"
+                    }
+            
             result = {
                 "status": "success",
                 "type": memory_output.get("type"),  # "action_execution" or "both"
@@ -202,6 +285,8 @@ IMPORTANT: The phone number {phone_number} already includes the + prefix and cou
                 "turns_used": orchestrator_result.get("turns_used", 0),
                 "whatsapp_confirmation_sent": whatsapp_sent,
                 "whatsapp_details": whatsapp_details,
+                "email_response_sent": email_sent,
+                "email_details": email_details,
                 "output_dir": logger.get_output_dir()
             }
             

@@ -89,6 +89,31 @@ AGENT_PROFILES = {
         verbosity="low",             # Concise mobile text
         max_turns=5
     ),
+    
+    # ============================================================
+    # ANALYTICS AGENTS (DDMac Analytics Database)
+    # ============================================================
+    
+    "employee_analytics": AgentOptimizationProfile(
+        model="gpt-5-mini",
+        reasoning_effort="low",      # Data queries with some analysis
+        verbosity="medium",          # Detailed analytics summaries
+        max_turns=5
+    ),
+    
+    "project_analytics": AgentOptimizationProfile(
+        model="gpt-5-mini",
+        reasoning_effort="low",      # Budget and variance analysis
+        verbosity="medium",          # Detailed project insights
+        max_turns=5
+    ),
+    
+    "task_analytics": AgentOptimizationProfile(
+        model="gpt-5-mini",
+        reasoning_effort="low",      # Task-level data analysis
+        verbosity="medium",          # Detailed task breakdowns
+        max_turns=5
+    ),
 }
 
 

@@ -15,6 +15,10 @@ from agent_system.subagents.calendar_agent import CalendarAgent
 from agent_system.subagents.email_agent import EmailAgent
 from agent_system.subagents.report_writer_agent import ReportWriterAgent
 from agent_system.subagents.whatsapp_agent import WhatsAppAgent
+from agent_system.subagents.employee_analytics_agent import EmployeeAnalyticsAgent
+from agent_system.subagents.project_analytics_agent import ProjectAnalyticsAgent
+from agent_system.subagents.task_analytics_agent import TaskAnalyticsAgent
+from agent_system.subagents.code_interpreter_agent import CodeInterpreterAgent
 from config.agent_config import get_orchestrator_profile
 
 class OrchestratorAgent:
@@ -43,13 +47,17 @@ class OrchestratorAgent:
         self.plan_manager = PlanManager()
         self.memory_storage = MemoryStorage()
         
-        # Initialize sub-agents (4 communication agents only)
+        # Initialize sub-agents (4 communication + 3 analytics + 1 code interpreter)
         self.logger.log("Initializing sub-agents with Agents SDK...")
         self.subagents = {
             "calendar": CalendarAgent(logger),
             "email": EmailAgent(logger),
             "report_writer": ReportWriterAgent(logger),
-            "whatsapp": WhatsAppAgent(logger)
+            "whatsapp": WhatsAppAgent(logger),
+            "employee_analytics": EmployeeAnalyticsAgent(logger),
+            "project_analytics": ProjectAnalyticsAgent(logger),
+            "task_analytics": TaskAnalyticsAgent(logger),
+            "code_interpreter": CodeInterpreterAgent(logger)
         }
         
         self.logger.log(f"Sub-agents initialized: {', '.join(self.subagents.keys())}")
@@ -97,11 +105,35 @@ class OrchestratorAgent:
             tool_description="Send WhatsApp messages and confirmations to phone numbers with concise, formatted updates"
         )
         
+        employee_analytics_tool = self.subagents["employee_analytics"].as_tool(
+            tool_name="employee_analytics_expert",
+            tool_description="Query employee performance, productivity, hours worked, and client distribution from DDMac Analytics database"
+        )
+        
+        project_analytics_tool = self.subagents["project_analytics"].as_tool(
+            tool_name="project_analytics_expert",
+            tool_description="Analyze project budgets, progress, team allocation, and variance from DDMac Analytics database"
+        )
+        
+        task_analytics_tool = self.subagents["task_analytics"].as_tool(
+            tool_name="task_analytics_expert",
+            tool_description="Track task-level efficiency, foreman progress, budget variance, and completion status from DDMac Analytics database"
+        )
+        
+        code_interpreter_tool = self.subagents["code_interpreter"].as_tool(
+            tool_name="code_interpreter_expert",
+            tool_description="Create data visualizations, charts, plots, CSV/Excel files, and perform data analysis using Python code execution"
+        )
+        
         self.logger.log("Sub-agents converted to tools:")
         self.logger.log("  - calendar_expert (Calendar Agent)")
         self.logger.log("  - email_expert (Email Agent)")
         self.logger.log("  - report_expert (Report Writer Agent)")
         self.logger.log("  - whatsapp_expert (WhatsApp Agent)")
+        self.logger.log("  - employee_analytics_expert (Employee Analytics Agent)")
+        self.logger.log("  - project_analytics_expert (Project Analytics Agent)")
+        self.logger.log("  - task_analytics_expert (Task Analytics Agent)")
+        self.logger.log("  - code_interpreter_expert (Code Interpreter Agent)")
         
         # Build orchestrator instructions
         instructions = self._get_orchestrator_instructions()
@@ -112,11 +144,20 @@ class OrchestratorAgent:
             instructions=instructions,
             model=profile.model,
             model_settings=profile.to_model_settings(),  # Dynamic reasoning + verbosity!
-            tools=[calendar_tool, email_tool, report_tool, whatsapp_tool],
+            tools=[
+                calendar_tool, 
+                email_tool, 
+                report_tool, 
+                whatsapp_tool,
+                employee_analytics_tool,
+                project_analytics_tool,
+                task_analytics_tool,
+                code_interpreter_tool
+            ],
             tool_use_behavior="run_llm_again"  # Process tool results before responding
         )
         
-        self.logger.log(f"Orchestrator Agent created for {complexity} complexity with 4 specialist tool-agents")
+        self.logger.log(f"Orchestrator Agent created for {complexity} complexity with 8 specialist tool-agents")
         
         return orchestrator
     
@@ -127,21 +168,43 @@ class OrchestratorAgent:
         Returns:
             Instruction string
         """
-        return """You are the DiddyMac Orchestrator Agent coordinating specialized communication agents to complete tasks.
+        return """You are the DiddyMac Orchestrator Agent coordinating specialized communication and analytics agents to complete tasks.
 
 CORE BEHAVIOR: Execute proactively with intelligent defaults. Don't ask, DO. Report completed actions.
 
-AVAILABLE TOOLS (4 specialist agents):
+AVAILABLE TOOLS (8 specialist agents):
+
+COMMUNICATION AGENTS:
 - calendar_expert: Google Calendar + Meet (schedule, create events, manage invitations)
 - email_expert: Gmail + Docs (send, draft, read, share docs with email)
-- report_expert: Google Docs (create documents, reports, professional formatting)
+- report_expert: Google Docs + Drive (create documents, folders, set sharing to "anyone with link")
 - whatsapp_expert: WhatsApp (send confirmations, status updates)
+
+ANALYTICS AGENTS (DDMac Analytics Database):
+- employee_analytics_expert: Employee performance, productivity, hours, client distribution
+- project_analytics_expert: Project budgets, progress, team allocation, variance analysis
+- task_analytics_expert: Task efficiency, foreman progress, budget variance, completion tracking
+
+DATA & VISUALIZATION:
+- code_interpreter_expert: Create charts, plots, CSV/Excel files, data analysis with Python
 
 WHEN TO USE EACH EXPERT:
 - Calendar/meeting questions or scheduling → calendar_expert
 - Email questions or sending → email_expert
-- Creating documents → report_expert
+- Creating text documents, folders, reports → report_expert
 - Confirmations → whatsapp_expert
+- Employee performance/hours/productivity questions → employee_analytics_expert
+- Project budget/progress/team questions → project_analytics_expert
+- Task efficiency/variance/foreman progress questions → task_analytics_expert
+- Charts, plots, visualizations, CSV/Excel files → code_interpreter_expert
+
+WORKFLOW FOR REPORTS WITH VISUALIZATIONS:
+1. Use analytics agents to get data
+2. Use code_interpreter_expert to create charts/CSV files
+3. Use report_expert to create Google Drive folder and Doc
+4. Upload visualization files to the folder (via report_expert)
+5. Share folder link with "anyone with link can view"
+6. Email/WhatsApp the folder link to user
 
 EXECUTION PROTOCOL:
 1. Analyze request + rules
