@@ -1,0 +1,10 @@
+supabase>=2.0.0
+composio-openai
+composio-openai-agents>=0.8.0
+openai>=1.50.0
+openai-agents
+python-dotenv
+flask
+pydantic>=2.0.0
+requests
+
