@@ -64,7 +64,7 @@ class BaseSubAgent(ABC):
         else:
             # Fallback default (medium settings)
             self.profile = AgentOptimizationProfile(
-                model="gpt-5",
+                model="gpt-5.1",
                 reasoning_effort="medium",
                 verbosity="medium",
                 max_turns=10

@@ -70,14 +70,14 @@ AGENT_PROFILES = {
     ),
     
     "email": AgentOptimizationProfile(
-        model="gpt-5",
+        model="gpt-5.1",
         reasoning_effort="medium",   # Tone, composition, rules
         verbosity="medium",          # Professional formatting
         max_turns=10
     ),
     
     "report_writer": AgentOptimizationProfile(
-        model="gpt-5",
+        model="gpt-5.1",
         reasoning_effort="medium",   # Creative composition
         verbosity="medium",          # Structured documents
         max_turns=10
@@ -123,21 +123,21 @@ AGENT_PROFILES = {
 
 ORCHESTRATOR_PROFILES = {
     "SIMPLE": AgentOptimizationProfile(
-        model="gpt-5",
+        model="gpt-5.1",
         reasoning_effort="minimal",  # Quick decisions
         verbosity="low",             # Brief responses
         max_turns=15
     ),
     
     "MEDIUM": AgentOptimizationProfile(
-        model="gpt-5",
+        model="gpt-5.1",
         reasoning_effort="low",      # Some planning needed
         verbosity="medium",          # Standard responses
         max_turns=30
     ),
     
     "COMPLEX": AgentOptimizationProfile(
-        model="gpt-5",
+        model="gpt-5.1",
         reasoning_effort="medium",   # Deep analysis
         verbosity="medium",          # Detailed responses
         max_turns=45
