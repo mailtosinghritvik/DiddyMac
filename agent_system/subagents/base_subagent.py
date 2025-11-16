@@ -3,14 +3,19 @@ from abc import ABC, abstractmethod
 from typing import Dict, Any, List, Optional
 from composio import Composio
 from composio_openai_agents import OpenAIAgentsProvider
-from dotenv import load_dotenv
 import sys
 from agents import Agent, function_tool, RunContextWrapper, trace
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-load_dotenv()
+# Load environment variables (supports both .env and AWS Parameter Store)
+try:
+    from utils.aws_env_loader import ensure_env_vars_loaded
+    ensure_env_vars_loaded()
+except:
+    from dotenv import load_dotenv
+    load_dotenv()
 
 # Import configuration
 from config.agent_config import AgentOptimizationProfile, get_agent_profile

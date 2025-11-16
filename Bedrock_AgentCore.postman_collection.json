@@ -1,0 +1,165 @@
+{
+	"info": {
+		"_postman_id": "bedrock-agentcore-collection",
+		"name": "Bedrock AgentCore - RitvikAgent",
+		"description": "Collection for testing Bedrock AgentCore agent: RitvikAgent-Nfl5014O49",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Invoke Agent - Simple",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"inputText\": \"Hello, how are you?\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://bedrock-agentcore.us-west-2.amazonaws.com/agents/RitvikAgent-Nfl5014O49/invoke",
+					"protocol": "https",
+					"host": [
+						"bedrock-agentcore",
+						"us-west-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"agents",
+						"RitvikAgent-Nfl5014O49",
+						"invoke"
+					]
+				},
+				"description": "Simple invocation with just input text"
+			},
+			"response": []
+		},
+		{
+			"name": "Invoke Agent - With Session",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"inputText\": \"What did I ask you before?\",\n  \"sessionId\": \"your-session-id-here\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://bedrock-agentcore.us-west-2.amazonaws.com/agents/RitvikAgent-Nfl5014O49/invoke",
+					"protocol": "https",
+					"host": [
+						"bedrock-agentcore",
+						"us-west-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"agents",
+						"RitvikAgent-Nfl5014O49",
+						"invoke"
+					]
+				},
+				"description": "Invocation with session ID for conversation context"
+			},
+			"response": []
+		},
+		{
+			"name": "Invoke Agent - Custom Format",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"prompt\": \"Schedule a meeting tomorrow at 3pm\",\n  \"user\": \"user@example.com\",\n  \"source\": \"email\",\n  \"subject\": \"Meeting Request\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://bedrock-agentcore.us-west-2.amazonaws.com/agents/RitvikAgent-Nfl5014O49/invoke",
+					"protocol": "https",
+					"host": [
+						"bedrock-agentcore",
+						"us-west-2",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"agents",
+						"RitvikAgent-Nfl5014O49",
+						"invoke"
+					]
+				},
+				"description": "Custom format matching your agent.py implementation"
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "awsv4",
+		"awsv4": {
+			"accessKey": "{{AWS_ACCESS_KEY_ID}}",
+			"secretKey": "{{AWS_SECRET_ACCESS_KEY}}",
+			"service": "bedrock-agentcore",
+			"region": "us-west-2",
+			"sessionToken": "{{AWS_SESSION_TOKEN}}"
+		}
+	},
+	"variable": [
+		{
+			"key": "AWS_ACCESS_KEY_ID",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "AWS_SECRET_ACCESS_KEY",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "AWS_SESSION_TOKEN",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "AGENT_ID",
+			"value": "RitvikAgent-Nfl5014O49",
+			"type": "string"
+		},
+		{
+			"key": "REGION",
+			"value": "us-west-2",
+			"type": "string"
+		}
+	]
+}
+

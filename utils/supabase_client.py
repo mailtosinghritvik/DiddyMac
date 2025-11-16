@@ -1,10 +1,10 @@
 import os
 from supabase import create_client, Client
-from dotenv import load_dotenv
 from typing import Dict, List, Optional, Any
 
-# Load environment variables
-load_dotenv()
+# Load environment variables (supports both .env and AWS Parameter Store)
+from utils.aws_env_loader import ensure_env_vars_loaded
+ensure_env_vars_loaded()
 
 class SupabaseClient:
     def __init__(self):

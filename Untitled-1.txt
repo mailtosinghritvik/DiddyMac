@@ -1,0 +1,4 @@
+   aws ssm put-parameter --name "/bedrock-agentcore/RitvikAgent/SUPABASE_URL" --value "your-url" --type "String"
+   aws ssm put-parameter --name "/bedrock-agentcore/RitvikAgent/SUPABASE_KEY" --value "your-key" --type "SecureString"
+   aws ssm put-parameter --name "/bedrock-agentcore/RitvikAgent/OPENAI_API_KEY" --value "your-key" --type "SecureString"
+   # ... etc for all variables

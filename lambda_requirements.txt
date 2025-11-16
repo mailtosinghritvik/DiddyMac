@@ -1,0 +1,9 @@
+# Requirements for AWS Lambda deployment
+# Minimal dependencies for Lambda
+
+boto3>=1.40.0
+botocore>=1.40.0
+
+# Note: FastAPI and uvicorn are NOT needed for Lambda
+# The lambda_function.py uses the Bedrock client directly
+

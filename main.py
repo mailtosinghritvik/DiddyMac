@@ -1,8 +1,11 @@
 import os
 import sys
 import asyncio
-from typing import Dict, Any
-from datetime import datetime
+import hashlib
+import uuid
+from typing import Dict, Any, Set
+from datetime import datetime, timedelta
+from collections import defaultdict
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -13,6 +16,37 @@ from utils.whatsapp_helper import extract_phone_number, format_whatsapp_confirma
 from agent_system.memory_agent import MemoryAgent
 from agent_system.orchestrator_agent import OrchestratorAgent
 from agent_system.subagents.whatsapp_agent import WhatsAppAgent
+
+# Request deduplication cache
+# Stores hashes of recently processed requests to prevent duplicate processing
+_processed_requests: Dict[str, datetime] = {}
+_request_lock = asyncio.Lock()
+DEDUP_WINDOW_SECONDS = 300  # 5 minutes
+
+def _generate_request_hash(json_input: Dict[str, Any]) -> str:
+    """
+    Generate a unique hash for a request based on user, input, and timestamp
+    Used for deduplication
+    """
+    # Create a deterministic hash from key fields
+    key_fields = {
+        "user": json_input.get("user", ""),
+        "input": json_input.get("input", ""),
+        "source": json_input.get("source", ""),
+        "subject": json_input.get("subject", ""),
+        # Round timestamp to nearest 10 seconds to catch near-simultaneous duplicates
+        "timestamp": str(json_input.get("created_at", ""))[:16] if json_input.get("created_at") else ""
+    }
+    hash_str = hashlib.md5(str(sorted(key_fields.items())).encode()).hexdigest()
+    return hash_str
+
+async def _cleanup_old_requests():
+    """Remove expired entries from the deduplication cache"""
+    async with _request_lock:
+        cutoff_time = datetime.now() - timedelta(seconds=DEDUP_WINDOW_SECONDS)
+        expired_keys = [k for k, v in _processed_requests.items() if v < cutoff_time]
+        for key in expired_keys:
+            del _processed_requests[key]
 
 async def process_request_async(json_input: Dict[str, Any], run_id: str = None) -> Dict[str, Any]:
     """
@@ -26,8 +60,36 @@ async def process_request_async(json_input: Dict[str, Any], run_id: str = None) 
     Returns:
         Dictionary with processing results
     """
+    # Generate unique request ID for tracking
+    request_uuid = str(uuid.uuid4())[:8]
+    
+    # Generate request hash for deduplication
+    request_hash = _generate_request_hash(json_input)
+    
+    # Check if this request has been processed recently (deduplication)
+    async with _request_lock:
+        if request_hash in _processed_requests:
+            time_since = (datetime.now() - _processed_requests[request_hash]).total_seconds()
+            print(f"⚠️  DUPLICATE REQUEST DETECTED (ID: {request_uuid}, Hash: {request_hash[:8]})")
+            print(f"   Request was processed {time_since:.1f} seconds ago - SKIPPING to prevent duplicate execution")
+            return {
+                "status": "skipped",
+                "reason": "duplicate_request",
+                "message": f"Request already processed {time_since:.1f} seconds ago",
+                "request_id": request_uuid,
+                "request_hash": request_hash[:8],
+                "original_processing_time": _processed_requests[request_hash].isoformat()
+            }
+        
+        # Mark this request as being processed
+        _processed_requests[request_hash] = datetime.now()
+    
+    # Clean up old entries periodically (async task, non-blocking)
+    asyncio.create_task(_cleanup_old_requests())
+    
     # Initialize logger
     logger = AgentLogger(run_id)
+    logger.log(f"🔵 REQUEST ID: {request_uuid} | Hash: {request_hash[:8]}")
     logger.log("=== STARTING REQUEST PROCESSING (DIDDYMAC - AGENTS SDK + GPT-5) ===")
     logger.log(f"Input: {json_input}")
     
@@ -41,7 +103,7 @@ async def process_request_async(json_input: Dict[str, Any], run_id: str = None) 
         
         # Extract fields from input
         user = json_input.get("user")
-        source = json_input.get("source")
+        source = 'email'
         input_text = json_input.get("input")
         subject = json_input.get("subject")
         

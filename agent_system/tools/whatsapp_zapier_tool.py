@@ -5,9 +5,14 @@ Follows OpenAI Agents SDK custom tool pattern
 from agents import function_tool
 import requests
 import os
-from dotenv import load_dotenv
 
-load_dotenv()
+# Load environment variables (supports both .env and AWS Parameter Store)
+try:
+    from utils.aws_env_loader import ensure_env_vars_loaded
+    ensure_env_vars_loaded()
+except:
+    from dotenv import load_dotenv
+    load_dotenv()
 
 # Zapier webhook URL for WhatsApp
 ZAPIER_WEBHOOK_URL = os.getenv(

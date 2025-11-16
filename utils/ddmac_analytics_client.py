@@ -4,11 +4,12 @@ Separate client for DDMac Analytics database (different from communication datab
 """
 import os
 from supabase import create_client, Client
-from dotenv import load_dotenv
 from typing import Dict, List, Optional, Any
 import pandas as pd
 
-load_dotenv()
+# Load environment variables (supports both .env and AWS Parameter Store)
+from utils.aws_env_loader import ensure_env_vars_loaded
+ensure_env_vars_loaded()
 
 class DDMacAnalyticsClient:
     """Client for DDMac Analytics Supabase database"""

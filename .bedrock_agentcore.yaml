@@ -1,0 +1,94 @@
+default_agent: RitvikAgent
+agents:
+  agent:
+    name: agent
+    entrypoint: C:/Users/Naveenkumar/Music/ritvik/DiddyMac/agent.py
+    deployment_type: container
+    runtime_type: null
+    platform: linux/arm64
+    container_runtime: none
+    source_path: C:\Users\Naveenkumar\Music\ritvik\DiddyMac
+    aws:
+      execution_role: null
+      execution_role_auto_create: true
+      account: '624571284647'
+      region: us-west-2
+      ecr_repository: null
+      ecr_auto_create: true
+      s3_path: null
+      s3_auto_create: false
+      network_configuration:
+        network_mode: PUBLIC
+        network_mode_config: null
+      protocol_configuration:
+        server_protocol: HTTP
+      observability:
+        enabled: true
+      lifecycle_configuration:
+        idle_runtime_session_timeout: null
+        max_lifetime: null
+    bedrock_agentcore:
+      agent_id: null
+      agent_arn: null
+      agent_session_id: null
+    codebuild:
+      project_name: null
+      execution_role: null
+      source_bucket: null
+    memory:
+      mode: STM_ONLY
+      memory_id: null
+      memory_arn: null
+      memory_name: agent_memory
+      event_expiry_days: 30
+      first_invoke_memory_check_done: false
+      was_created_by_toolkit: false
+    authorizer_configuration: null
+    request_header_configuration: null
+    oauth_configuration: null
+  RitvikAgent:
+    name: RitvikAgent
+    entrypoint: C:/Users/Naveenkumar/Music/ritvik/DiddyMac/agent.py
+    deployment_type: container
+    runtime_type: null
+    platform: linux/arm64
+    container_runtime: none
+    source_path: C:\Users\Naveenkumar\Music\ritvik\DiddyMac
+    aws:
+      execution_role: arn:aws:iam::624571284647:role/AmazonBedrockAgentCoreSDKRuntime-us-west-2-b304167607
+      execution_role_auto_create: false
+      account: '624571284647'
+      region: us-west-2
+      ecr_repository: 624571284647.dkr.ecr.us-west-2.amazonaws.com/bedrock-agentcore-ritvikagent
+      ecr_auto_create: false
+      s3_path: null
+      s3_auto_create: false
+      network_configuration:
+        network_mode: PUBLIC
+        network_mode_config: null
+      protocol_configuration:
+        server_protocol: HTTP
+      observability:
+        enabled: true
+      lifecycle_configuration:
+        idle_runtime_session_timeout: null
+        max_lifetime: null
+    bedrock_agentcore:
+      agent_id: RitvikAgent-Nfl5014O49
+      agent_arn: arn:aws:bedrock-agentcore:us-west-2:624571284647:runtime/RitvikAgent-Nfl5014O49
+      agent_session_id: null
+    codebuild:
+      project_name: bedrock-agentcore-ritvikagent-builder
+      execution_role: arn:aws:iam::624571284647:role/AmazonBedrockAgentCoreSDKCodeBuild-us-west-2-b304167607
+      source_bucket: bedrock-agentcore-codebuild-sources-624571284647-us-west-2
+    memory:
+      mode: STM_AND_LTM
+      memory_id: RitvikAgent_mem-2fRI3kGYtF
+      memory_arn: arn:aws:bedrock-agentcore:us-west-2:624571284647:memory/RitvikAgent_mem-2fRI3kGYtF
+      memory_name: RitvikAgent_mem
+      event_expiry_days: 30
+      first_invoke_memory_check_done: true
+      was_created_by_toolkit: true
+    authorizer_configuration: null
+    request_header_configuration: null
+    oauth_configuration: null

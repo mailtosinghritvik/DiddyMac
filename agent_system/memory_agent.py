@@ -1,14 +1,19 @@
 import os
 import sys
 from typing import Dict, Any, List
-from dotenv import load_dotenv
 from pydantic import BaseModel
 from agents import Agent, Runner, trace
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-load_dotenv()
+# Load environment variables (supports both .env and AWS Parameter Store)
+try:
+    from utils.aws_env_loader import ensure_env_vars_loaded
+    ensure_env_vars_loaded()
+except:
+    from dotenv import load_dotenv
+    load_dotenv()
 
 # Import configuration for optimization profiles
 from config.agent_config import AGENT_PROFILES
